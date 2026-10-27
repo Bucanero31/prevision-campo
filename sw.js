@@ -1,6 +1,6 @@
 // Service worker: guarda la app y los límites para abrirla sin conexión en campo.
 // Las previsiones se guardan aparte (IndexedDB) desde la propia app.
-const VERSION = "prevision-v3";
+const VERSION = "prevision-v4";
 const ARCHIVOS = [
   "./",
   "index.html",
@@ -27,7 +27,7 @@ const ARCHIVOS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(ARCHIVOS)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(ARCHIVOS.map((u) => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {
