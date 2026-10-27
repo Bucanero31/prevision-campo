@@ -13,6 +13,17 @@ municipal y sección, combinando varios modelos meteorológicos, para planificar
 > Desde la red local (`http://192.168…`) la app funciona, pero el botón de GPS no. Para usar el GPS en
 > campo hay que publicarla con `https` (por ejemplo en el NAS con certificado, o un hosting estático).
 
+## Versión web (https, para el teléfono en campo)
+
+La misma app está publicada en GitHub Pages. Ahí el GPS funciona y se puede instalar en el teléfono
+(Chrome: menú ⋮ → "Agregar a pantalla principal"; iPhone/Safari: Compartir → "Agregar a inicio").
+
+- Sin el servidor de la oficina no se usa MET Norway (sus condiciones exigen un servidor propio):
+  la versión web combina los 10 modelos de Open-Meteo. Cada teléfono consulta Open-Meteo directamente.
+- La dirección es pública para quien la tenga; no contiene claves ni datos privados.
+- **Actualizar la web** después de cambiar algo: doble clic en `actualizar_web.bat` (sube los cambios con
+  Git; la web se renueva en 1–2 minutos).
+
 ## Qué muestra
 
 | Dato | Cómo se calcula |
