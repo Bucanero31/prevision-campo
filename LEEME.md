@@ -15,8 +15,16 @@ municipal y sección, combinando varios modelos meteorológicos, para planificar
 
 ## Versión web (https, para el teléfono en campo)
 
-La misma app está publicada en GitHub Pages. Ahí el GPS funciona y se puede instalar en el teléfono
-(Chrome: menú ⋮ → "Agregar a pantalla principal"; iPhone/Safari: Compartir → "Agregar a inicio").
+La misma app está publicada en **https://bucanero31.github.io/prevision-campo/** (repositorio
+`github.com/Bucanero31/prevision-campo`). Ahí el GPS funciona y se puede instalar en el teléfono:
+
+1. Abra la dirección en el teléfono (Chrome en Android, Safari en iPhone).
+2. Instálela: Android/Chrome → menú ⋮ → "Agregar a pantalla principal" o "Instalar app";
+   iPhone/Safari → botón Compartir → "Agregar a inicio".
+3. Toque el botón de GPS (círculo con mira) y permita la ubicación cuando el teléfono lo pida.
+   La app sigue su posición y cambia la previsión al pasar a otra sección o moverse más de 2 km.
+4. Antes de salir a una zona sin señal, abra la app con datos: queda guardada la última previsión
+   del mapa y de cada lugar consultado, y la app abre sin conexión.
 
 - Sin el servidor de la oficina no se usa MET Norway (sus condiciones exigen un servidor propio):
   la versión web combina los 10 modelos de Open-Meteo. Cada teléfono consulta Open-Meteo directamente.
