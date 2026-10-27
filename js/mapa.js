@@ -81,6 +81,10 @@ export class Mapa {
       maxBounds: LIMITES_RD,
       maxBoundsViscosity: 0.8,
       zoomSnap: 1,
+      // Sin la animación de aparición, Leaflet retira el nivel de mosaicos anterior en cuanto carga el
+      // nuevo (con ella, a veces quedaban letras gigantes del nivel anterior en la capa de nombres).
+      fadeAnimation: false,
+      scrollWheelZoom: false, // se maneja abajo: un nivel por cada clic de la rueda
       preferCanvas: true,
       attributionControl: true,
     });
@@ -118,12 +122,48 @@ export class Mapa {
     this.capaEtiquetas = L.layerGroup().addTo(this.mapa);
     this.capaRealce = L.layerGroup().addTo(this.mapa);
     this.mapa.on("zoomend moveend", () => this._programarEtiquetas());
+    this._activarRueda();
     // Tras un flyTo, Leaflet 1.9.4 a veces deja visible el nivel de mosaicos anterior (escalado);
     // en la capa transparente de nombres se ven letras gigantes. Se poda al terminar cada movimiento.
     const podar = () => this.mapa.eachLayer((c) => c instanceof L.GridLayer && typeof c._pruneTiles === "function" && c._pruneTiles());
     this.mapa.on("zoomend moveend", () => setTimeout(podar, 500));
     this.mapa.on("layeradd", (e) => e.layer instanceof L.GridLayer && e.layer.on("load", podar));
     this.mapa.on("zoomend", () => this._alternarFinas());
+  }
+
+  // Rueda del ratón: un nivel de zoom por cada 100 px de desplazamiento (lo que mide un clic de la rueda
+  // en Windows), lleguen en un solo evento o repartidos en varios por el desplazamiento suave.
+  _activarRueda() {
+    const PX_POR_NIVEL = 100;
+    let acumulado = 0;
+    let ultimo = 0;
+    // Leaflet ignora un zoom pedido mientras anima el anterior: los niveles se encolan y se aplican al terminar.
+    let pendientes = 0;
+    let punto = null;
+    const aplicar = () => {
+      if (!pendientes || this.mapa._animatingZoom) return;
+      const n = pendientes;
+      pendientes = 0;
+      this.mapa.setZoomAround(punto, this.mapa.getZoom() - n);
+    };
+    this.mapa.on("zoomend", aplicar);
+    this.mapa.getContainer().addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault();
+        const ahora = performance.now();
+        if (ahora - ultimo > 300) acumulado = 0; // pausa: empieza un gesto nuevo
+        ultimo = ahora;
+        acumulado += e.deltaMode === 1 ? e.deltaY * 33 : e.deltaMode === 2 ? e.deltaY * 300 : e.deltaY;
+        const niveles = Math.trunc(acumulado / PX_POR_NIVEL);
+        if (!niveles) return;
+        acumulado -= niveles * PX_POR_NIVEL;
+        pendientes += niveles;
+        punto = this.mapa.mouseEventToContainerPoint(e);
+        aplicar();
+      },
+      { passive: false },
+    );
   }
 
   // ---------- carga de límites ----------
