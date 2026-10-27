@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Previsión de Campo · Lexgeo</title>
+  <meta name="description" content="Previsión del tiempo por municipio y sección de República Dominicana, combinando varios modelos meteorológicos, para planificar trabajos de campo.">
+  <meta name="theme-color" content="#1c5cab">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/icono.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="barra">
+    <div class="marca">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="#eb8a00"/><path d="M10 26h14a6 6 0 0 0 0-12 8 8 0 0 0-15.3 2.6A4.7 4.7 0 0 0 10 26z" fill="#2a78d6"/></svg>
+      <div class="texto-marca">Previsión de campo<small>República Dominicana · varios modelos</small></div>
+    </div>
+    <div class="buscador">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input id="buscar" type="search" placeholder="Buscar municipio, distrito o sección…" autocomplete="off" spellcheck="false"
+             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugerencias">
+      <ul id="sugerencias" class="sugerencias" role="listbox" hidden></ul>
+    </div>
+    <div class="espaciador"></div>
+    <div class="segmentado" role="group" aria-label="Periodo">
+      <button type="button" data-modo="hoy" aria-pressed="true">Hoy</button>
+      <button type="button" data-modo="semana" aria-pressed="false">Semana</button>
+    </div>
+    <button type="button" id="btn-gps" class="btn-icono" aria-pressed="false" title="Seguir mi ubicación (GPS)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
+    </button>
+    <button type="button" id="btn-actualizar" class="btn-icono" title="Actualizar ahora">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+    </button>
+    <button type="button" id="btn-ajustes" class="btn-icono" title="Ajustes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <div class="mapa-contenedor">
+      <div id="mapa" aria-label="Mapa de República Dominicana"></div>
+      <div class="controles-mapa">
+        <select id="variable" class="selector-variable" autocomplete="off" aria-label="Qué mostrar en el mapa">
+          <option value="aptitud">Aptitud para campo</option>
+          <option value="prob">Probabilidad de lluvia</option>
+          <option value="lluvia">Lluvia prevista</option>
+          <option value="nubes">Nubosidad</option>
+          <option value="sol">Horas de sol</option>
+        </select>
+        <div id="dias" class="dias" role="group" aria-label="Día"></div>
+      </div>
+      <div id="leyenda" class="leyenda"></div>
+      <div id="aviso" class="aviso-flotante" role="status" hidden></div>
+      <div class="estado" aria-live="polite"><span id="estado-punto" class="punto cargando"></span><span id="estado-texto" class="texto">Cargando…</span></div>
+    </div>
+    <aside id="panel" class="panel" aria-label="Detalle de la previsión">
+      <button type="button" class="panel-asa" id="panel-asa" aria-label="Expandir o contraer el panel"></button>
+      <div id="panel-contenido"></div>
+    </aside>
+  </main>
+
+  <dialog id="ajustes" class="ajustes">
+    <form method="dialog" id="form-ajustes">
+      <header>Ajustes</header>
+      <div class="cuerpo" id="ajustes-cuerpo"></div>
+      <footer>
+        <button type="button" class="boton" id="ajustes-restablecer">Restablecer</button>
+        <button type="button" class="boton" id="ajustes-cancelar">Cancelar</button>
+        <button type="submit" class="boton primario" id="ajustes-guardar">Guardar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

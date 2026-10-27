@@ -1,0 +1,14 @@
+{
+  "name": "Previsión de campo · Lexgeo",
+  "short_name": "Previsión campo",
+  "description": "Previsión del tiempo por municipio y sección de República Dominicana combinando varios modelos.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f9f9f7",
+  "theme_color": "#1c5cab",
+  "lang": "es-DO",
+  "icons": [
+    { "src": "img/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
