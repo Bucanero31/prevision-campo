@@ -336,8 +336,9 @@ function mostrarDetalle(reg, { desdeCache }) {
     const sm = fuentes.serieDeMetNo(reg.metno);
     series.push(sm);
     listaFuentes.push({ nombre: sm.nombre, organismo: sm.organismo, ok: sm.horario.size > 0, corrida: sm.corrida, error: sm.horario.size ? null : "sin datos" });
-  } else if (estado.ajustes.usarMetNo) {
-    listaFuentes.push({ ...METNO, ok: false, error: reg.conMet ? reg.errorMetno || "sin respuesta" : "requiere el servidor local" });
+  } else if (reg.conMet) {
+    // Solo se lista como falla si se consultó; en la versión web no se consulta (ver nota de método).
+    listaFuentes.push({ ...METNO, ok: false, error: reg.errorMetno || "sin respuesta" });
   }
   const hoy = ahoraRD().fecha;
   const fechas = (reg.om.daily?.time || []).filter((f) => f >= hoy);
@@ -352,7 +353,11 @@ function mostrarDetalle(reg, { desdeCache }) {
     fuentes: listaFuentes,
     dias: combinar(validas, fechas, estado.ajustes, { conHoras: true }),
     notaMetodo:
-      "Estimado combinado: lluvia = mediana de los modelos (con su rango); probabilidad de lluvia = promedio de las probabilidades que publican los modelos con sistema de ensamble; nubosidad, horas de sol, temperatura y viento = promedio. MET Norway aporta datos horarios de los próximos ~2,5 días. Datos: Open-Meteo (CC BY 4.0) y MET Norway (api.met.no). Corridas en hora UTC.",
+      "Estimado combinado: lluvia = mediana de los modelos (con su rango); probabilidad de lluvia = promedio de las probabilidades que publican los modelos con sistema de ensamble; nubosidad, horas de sol, temperatura y viento = promedio. " +
+      (reg.conMet
+        ? "MET Norway aporta datos horarios de los próximos ~2,5 días. Datos: Open-Meteo (CC BY 4.0) y MET Norway (api.met.no)."
+        : "Versión web: MET Norway solo se consulta desde el servidor de la oficina, como exigen sus condiciones. Datos: Open-Meteo (CC BY 4.0).") +
+      " Corridas en hora UTC.",
   };
   panel.mostrar(pron, opcionesPanel());
 }
