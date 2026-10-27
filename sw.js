@@ -1,6 +1,6 @@
 // Service worker: guarda la app y los límites para abrirla sin conexión en campo.
 // Las previsiones se guardan aparte (IndexedDB) desde la propia app.
-const VERSION = "prevision-v2";
+const VERSION = "prevision-v3";
 const ARCHIVOS = [
   "./",
   "index.html",
@@ -42,9 +42,11 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== self.location.origin || url.pathname.includes("/api/")) return;
-  // Red primero (para recibir siempre la versión nueva); sin conexión, la copia guardada.
+  // Red primero, revalidando con el servidor (GitHub Pages deja 10 min en la caché del navegador),
+  // para recibir siempre la versión nueva; sin conexión, la copia guardada.
+  const peticion = e.request.mode === "navigate" ? e.request.url : e.request;
   e.respondWith(
-    fetch(e.request)
+    fetch(peticion, { cache: "no-cache" })
       .then((r) => {
         if (r.ok) {
           const copia = r.clone();
